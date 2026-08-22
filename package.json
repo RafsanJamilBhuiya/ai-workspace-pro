@@ -1,0 +1,22 @@
+{
+  "name": "ai-workspace-pro",
+  "version": "1.0.0",
+  "description": "আপনার সমস্ত AI প্রজেক্টের জন্য একটি সম্পূর্ণ workspace সমাধান",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "build": "echo \"Build script coming soon\"",
+    "test": "echo \"Test script coming soon\"",
+    "lint": "echo \"Lint script coming soon\""
+  },
+  "keywords": [
+    "ai",
+    "workspace",
+    "pro",
+    "project-management"
+  ],
+  "author": "Rafsan Jamil Bhuiya",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
