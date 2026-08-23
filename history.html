@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>History — AI Workspace Pro</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/responsive.css"></head>
+<body><header class="site-header glass"><a href="index.html#/dashboard" class="brand">AI Workspace Pro</a><nav aria-label="History navigation"><a href="index.html#/chat">Chat</a><a href="index.html#/dashboard">Dashboard</a></nav></header><main class="page-shell"><section class="glass-card"><p class="eyebrow">Archive</p><h1>History</h1><p>This view reads locally archived workspace activity. It does not claim to retrieve server-side history that has not been configured.</p><div id="history-list" aria-live="polite"></div></section></main>
+<script>
+  const root = document.getElementById('history-list');
+  let items = []; try { items = JSON.parse(localStorage.getItem('ai-workspace.history') || '[]'); } catch {}
+  if (!items.length) { root.textContent = 'No local history is available.'; }
+  else { items.slice().reverse().forEach(item => { const article=document.createElement('article'); article.className='glass-card'; const time=document.createElement('time'); time.dateTime=item.createdAt||''; time.textContent=item.createdAt||'Unknown time'; const text=document.createElement('p'); text.textContent=item.text||item.message||''; article.append(time,text); root.appendChild(article); }); }
+</script></body></html>
