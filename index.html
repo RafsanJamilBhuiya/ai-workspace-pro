@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0f172a">
 <meta name="description" content="AI Workspace Pro — modular AI productivity workspace">
 <meta name="google-client-id" content="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://accounts.google.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://cdn.tailwindcss.com; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com; frame-src https://accounts.google.com; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://accounts.google.com; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdn.tailwindcss.com; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com; frame-src https://accounts.google.com; worker-src 'self' blob:; upgrade-insecure-requests">
 <title>AI Workspace Pro</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -26,31 +26,9 @@
 <p id="auth-status" class="auth-status" role="status" aria-live="polite">Initializing Google Identity Services…</p>
 </section>
 </main>
-
-<header id="app-header" class="app-header hidden">
-<div class="app-header-inner">
-<button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-drawer" aria-expanded="false">☰</button>
-<a class="app-brand" href="#/dashboard" aria-label="AI Workspace Pro dashboard">AI Workspace Pro</a>
-<nav class="desktop-nav" aria-label="Primary navigation">
-<a href="#/dashboard">Dashboard</a>
-<a href="#/chat">Chat</a>
-<a href="#/plugins">Plugins</a>
-<button id="desktop-signout" type="button">Sign out</button>
-</nav>
-</div>
-</header>
-
+<header id="app-header" class="app-header hidden"><div class="app-header-inner"><button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-drawer" aria-expanded="false">☰</button><a class="app-brand" href="#/dashboard" aria-label="AI Workspace Pro dashboard">AI Workspace Pro</a><nav class="desktop-nav" aria-label="Primary navigation"><a href="#/dashboard">Dashboard</a><a href="#/chat">Chat</a><a href="#/plugins">Plugins</a><button id="desktop-signout" type="button">Sign out</button></nav></div></header>
 <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
-<aside id="mobile-drawer" class="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
-<button id="drawer-close" class="drawer-close" type="button" aria-label="Close navigation">×</button>
-<nav aria-label="Mobile primary navigation">
-<a href="#/dashboard">Dashboard</a>
-<a href="#/chat">Chat</a>
-<a href="#/plugins">Plugins</a>
-</nav>
-<button id="drawer-signout" class="drawer-signout" type="button">Sign out</button>
-</aside>
-
+<aside id="mobile-drawer" class="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true"><button id="drawer-close" class="drawer-close" type="button" aria-label="Close navigation">×</button><nav aria-label="Mobile primary navigation"><a href="#/dashboard">Dashboard</a><a href="#/chat">Chat</a><a href="#/plugins">Plugins</a></nav><button id="drawer-signout" class="drawer-signout" type="button">Sign out</button></aside>
 <main id="spa-view" class="hidden" aria-live="polite"></main>
 </div>
 <noscript>JavaScript is required to use AI Workspace Pro.</noscript>
@@ -58,67 +36,11 @@
 <script type="module" src="./assets/js/spa-router.js"></script>
 <script type="module">
 import { clearSession, requestAccessToken, isAuthenticated } from './assets/js/auth.js';
-
-const toggle = document.querySelector('#mobile-menu-toggle');
-const drawer = document.querySelector('#mobile-drawer');
-const backdrop = document.querySelector('#drawer-backdrop');
-const closeButton = document.querySelector('#drawer-close');
-const signInButton = document.querySelector('#google-signin');
-const authStatus = document.querySelector('#auth-status');
-
-function setDrawerState(open) {
-  if (!drawer || !backdrop || !toggle) return;
-  drawer.classList.toggle('is-open', open);
-  backdrop.classList.toggle('is-open', open);
-  document.body.classList.toggle('drawer-open', open);
-  toggle.setAttribute('aria-expanded', String(open));
-  drawer.setAttribute('aria-hidden', String(!open));
-  backdrop.setAttribute('aria-hidden', String(!open));
-}
-
-toggle?.addEventListener('click', () => setDrawerState(!drawer.classList.contains('is-open')));
-closeButton?.addEventListener('click', () => setDrawerState(false));
-backdrop?.addEventListener('click', () => setDrawerState(false));
-drawer?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setDrawerState(false)));
-drawer?.querySelector('#drawer-signout')?.addEventListener('click', () => { setDrawerState(false); clearSession(); });
-document.querySelector('#desktop-signout')?.addEventListener('click', clearSession);
-document.addEventListener('keydown', event => { if (event.key === 'Escape') setDrawerState(false); });
-window.addEventListener('auth:logout', () => setDrawerState(false));
-
-signInButton?.addEventListener('click', async () => {
-  if (isAuthenticated()) return;
-  signInButton.disabled = true;
-  signInButton.setAttribute('aria-busy', 'true');
-  if (authStatus) authStatus.textContent = 'Opening Google sign-in…';
-  try {
-    await requestAccessToken({ prompt: 'select_account' });
-  } catch (error) {
-    if (authStatus) {
-      authStatus.textContent = error?.message || 'Google sign-in failed. Please try again.';
-      authStatus.className = 'auth-status error';
-    }
-  } finally {
-    signInButton.disabled = false;
-    signInButton.removeAttribute('aria-busy');
-  }
-});
-
-// Resolve the worker URL and scope from the current deployment root. This works
-// on both a GitHub Pages project site (/ai-workspace-pro/) and a domain root (/).
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const basePath = new URL('./', window.location.href).pathname;
-    const workerUrl = new URL('./service-worker.js', window.location.href).href;
-    navigator.serviceWorker.register(workerUrl, { scope: basePath })
-      .then(registration => {
-        window.AIWorkspaceAuth?.recordAudit?.('PWA_READY', 'Service worker registered.', { scope: registration.scope });
-      })
-      .catch(error => {
-        window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', { message: error.message }, 'warning');
-        console.warn('[AIWP] Service worker registration failed:', error);
-      });
-  }, { once: true });
-}
+const toggle=document.querySelector('#mobile-menu-toggle'),drawer=document.querySelector('#mobile-drawer'),backdrop=document.querySelector('#drawer-backdrop'),closeButton=document.querySelector('#drawer-close'),signInButton=document.querySelector('#google-signin'),authStatus=document.querySelector('#auth-status');
+function setDrawerState(open){if(!drawer||!backdrop||!toggle)return;drawer.classList.toggle('is-open',open);backdrop.classList.toggle('is-open',open);document.body.classList.toggle('drawer-open',open);toggle.setAttribute('aria-expanded',String(open));drawer.setAttribute('aria-hidden',String(!open));backdrop.setAttribute('aria-hidden',String(!open));}
+toggle?.addEventListener('click',()=>setDrawerState(!drawer.classList.contains('is-open')));closeButton?.addEventListener('click',()=>setDrawerState(false));backdrop?.addEventListener('click',()=>setDrawerState(false));drawer?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setDrawerState(false)));drawer?.querySelector('#drawer-signout')?.addEventListener('click',()=>{setDrawerState(false);clearSession();});document.querySelector('#desktop-signout')?.addEventListener('click',clearSession);document.addEventListener('keydown',event=>{if(event.key==='Escape')setDrawerState(false);});
+signInButton?.addEventListener('click',async()=>{if(isAuthenticated())return;signInButton.disabled=true;signInButton.setAttribute('aria-busy','true');if(authStatus)authStatus.textContent='Opening Google sign-in…';try{await requestAccessToken({prompt:'select_account'});}catch(error){if(authStatus){authStatus.textContent=error?.message||'Google sign-in failed. Please try again.';authStatus.className='auth-status error';}}finally{signInButton.disabled=false;signInButton.removeAttribute('aria-busy');}});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{const basePath=new URL('./',window.location.href).pathname;const workerUrl=new URL('./service-worker.js',window.location.href).href;navigator.serviceWorker.register(workerUrl,{scope:basePath}).then(reg=>window.AIWorkspaceAuth?.recordAudit?.('PWA_READY','Service worker registered.',{scope:reg.scope})).catch(error=>{window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR','Service worker registration failed.',{message:error.message},'warning');console.warn('[AIWP] Service worker registration failed:',error);});},{once:true});}
 </script>
 </body>
 </html>
