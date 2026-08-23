@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — AI Workspace Pro</title>
+  <link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/auth.css"><link rel="stylesheet" href="assets/css/responsive.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page"><main class="auth-shell"><section class="auth-card glass-card"><p class="eyebrow">AI Workspace Pro</p><h1>Sign in with Google</h1><p>Authorize Drive and Sheets access for your workspace.</p><div id="g_id_signin" aria-label="Google sign in"></div><p id="login-status" role="status" aria-live="polite">Loading authentication…</p><a href="index.html#/dashboard">Return to workspace</a></section></main>
+<script type="module">
+  import { initializeGoogleAuth, getStoredToken } from './assets/js/auth.js';
+  const status = document.getElementById('login-status');
+  const token = getStoredToken?.();
+  if (token) { status.textContent = 'You already have an active session.'; }
+  try { initializeGoogleAuth({ buttonContainerId: 'g_id_signin', onAuthenticated: () => { status.textContent = 'Signed in successfully.'; location.href = 'index.html#/dashboard'; } }); }
+  catch (error) { status.textContent = error.message || 'Authentication configuration is unavailable.'; }
+</script></body></html>
