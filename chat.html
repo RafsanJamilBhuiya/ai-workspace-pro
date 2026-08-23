@@ -1,9 +1,76 @@
 <section class="page-view chat-view">
-<header class="page-header"><div><p class="eyebrow">AI Assistant</p><h1>Chat</h1><p class="muted">Send natural-language requests or use slash commands.</p></div></header>
-<div id="chat-log" class="glass-panel chat-log" role="log" aria-live="polite" aria-label="Chat history"><div class="message assistant">Welcome. Try <code>/help</code>, <code>/clear</code>, or ask a question.</div></div>
+<header class="page-header">
+<div>
+<p class="eyebrow">AI Assistant</p>
+<h1>Chat</h1>
+<p class="muted">Send natural-language requests or use slash commands.</p>
+</div>
+</header>
+
+<div id="cloud-explorer" class="cloud-explorer" aria-label="Cloud Explorer"></div>
+
+<div id="chat-log" class="glass-panel chat-log" role="log" aria-live="polite" aria-label="Chat history">
+<div class="message assistant">Welcome. Try <code>/help</code>, <code>/clear</code>, or ask a question.</div>
+</div>
+
+<div id="chat-command-chips" class="command-chips" aria-label="Chat commands"></div>
+
 <form id="chat-form" class="glass-panel chat-form" autocomplete="off">
 <label class="sr-only" for="chat-input">Message</label>
 <textarea id="chat-input" rows="3" maxlength="12000" placeholder="Message AI…  /help"></textarea>
-<div class="chat-actions"><span id="chat-hint" class="muted">Enter to send · Shift+Enter for newline</span><button id="chat-send" class="button" type="submit">Send</button></div>
+<div class="chat-actions">
+<span id="chat-hint" class="muted">Enter to send · Shift+Enter for newline</span>
+<button id="chat-send" class="button" type="submit">Send</button>
+</div>
 </form>
-</section>
+
+<style>
+.command-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 8px 2px;
+  margin-top: 12px;
+  scrollbar-width: thin;
+}
+
+.command-chips button {
+  flex: 0 0 auto;
+  padding: 7px 13px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.08);
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.command-chips button:hover {
+  background: rgba(56, 189, 248, 0.16);
+  transform: translateY(-1px);
+}
+
+.cloud-explorer { width: min(100%, 360px); margin-bottom: 14px; }
+.cloud-explorer-panel { overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: rgba(15, 23, 42, .68); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.cloud-explorer-header { min-height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.cloud-explorer-title { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.cloud-explorer-tools { display: flex; align-items: center; gap: 8px; }
+.cloud-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; opacity: .72; }
+.cloud-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+.cloud-status.error i { background: var(--danger); }
+.cloud-status.loading i { background: var(--warning); }
+.cloud-refresh { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 19px; }
+.cloud-explorer-body { padding: 7px; }
+.cloud-file { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px; border: 0; border-radius: 11px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.cloud-file:hover { background: rgba(255,255,255,.06); }
+.cloud-file-icon { font-size: 20px; }
+.cloud-file-info { flex: 1; min-width: 0; }
+.cloud-file-info strong, .cloud-file-info small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cloud-file-info small { margin-top: 2px; opacity: .52; }
+.cloud-loading, .cloud-empty, .cloud-error { padding: 22px; text-align: center; }
+.cloud-error { color: #fca5a5; }
+.cloud-error button { border: 1px solid var(--border); border-radius: 9px; padding: 7px 11px; background: transparent; color: inherit; cursor: pointer; }
+@media (max-width: 767px) { .cloud-explorer { width: 100%; } }
+</style>
