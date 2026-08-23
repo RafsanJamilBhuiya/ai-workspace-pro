@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Signing out — AI Workspace Pro</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/auth.css"></head>
+<body class="auth-page"><main class="auth-shell"><section class="auth-card glass-card"><p class="eyebrow">AI Workspace Pro</p><h1>Signing out…</h1><p id="logout-status" role="status" aria-live="polite">Cleaning up the local session.</p><a id="return-link" href="index.html">Return to workspace</a></section></main>
+<script type="module">
+  import { clearSession } from './assets/js/auth.js';
+  const status = document.getElementById('logout-status');
+  try { clearSession(); status.textContent = 'Session cleared. Redirecting…'; setTimeout(() => { location.replace('index.html'); }, 500); }
+  catch (error) { status.textContent = `Local cleanup failed: ${error.message}`; }
+</script></body></html>
