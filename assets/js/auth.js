@@ -1,12 +1,15 @@
-/* AI Workspace Pro — Phase 2 authentication/session core.
- * Browser-only security boundary: OAuth access tokens are client-side because this
- * repository is a static GitHub Pages app. A real HttpOnly session must be issued
- * by a server/BFF; JavaScript cannot create HttpOnly cookies.
+/* AI Workspace Pro — hardened browser authentication/session core.
+ *
+ * GitHub Pages is a static host, so OAuth access tokens cannot be protected by
+ * HttpOnly cookies. Tokens are therefore kept in sessionStorage only (never
+ * localStorage). A server/BFF is required for true HttpOnly session cookies.
  */
 
-const CLIENT_ID = document.querySelector('meta[name="google-client-id"]')?.content || '1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com';
+const CLIENT_ID = document.querySelector('meta[name="google-client-id"]')?.content
+  || '1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive';
 const REQUIRED_SCOPES = SCOPES.split(/\s+/);
+const APP_BASE_PATH = new URL('./', window.location.href).pathname;
 
 export const AUTH_CONFIG = Object.freeze({
   clientId: CLIENT_ID,
@@ -31,13 +34,8 @@ let expiryTimer = null;
 let refreshInFlight = null;
 let idleCleanup = null;
 
-function safeJSON(value, fallback) {
-  try { return JSON.parse(value); } catch { return fallback; }
-}
-
-function uid() {
-  return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
+function safeJSON(value, fallback) { try { return JSON.parse(value); } catch { return fallback; } }
+function uid() { return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
 
 function writeArray(key, item, limit) {
   try {
@@ -45,72 +43,57 @@ function writeArray(key, item, limit) {
     const list = Array.isArray(current) ? current : [];
     list.push(item);
     localStorage.setItem(key, JSON.stringify(list.slice(-limit)));
-  } catch { /* telemetry must never break the app */ }
+  } catch { /* telemetry must never break authentication */ }
 }
 
 export function recordAudit(type, message, meta = {}, severity = 'info') {
-  writeArray(AUTH_CONFIG.auditKey, {
-    id: uid(), time: new Date().toISOString(), type, message, meta, severity
-  }, AUTH_CONFIG.auditLimit);
+  writeArray(AUTH_CONFIG.auditKey, { id: uid(), time: new Date().toISOString(), type, message, meta, severity }, AUTH_CONFIG.auditLimit);
   window.dispatchEvent(new CustomEvent('auth:audit', { detail: { type, message, meta, severity } }));
 }
 
 export function recordActivity(action, metadata = {}) {
-  writeArray(AUTH_CONFIG.historyKey, {
-    id: uid(), createdAt: new Date().toISOString(), action, metadata
-  }, AUTH_CONFIG.historyLimit);
+  writeArray(AUTH_CONFIG.historyKey, { id: uid(), createdAt: new Date().toISOString(), action, metadata }, AUTH_CONFIG.historyLimit);
 }
 
 function setSessionCookie(active) {
-  // This is only a non-sensitive browser state marker. HttpOnly requires a server.
-  document.cookie = `${AUTH_CONFIG.cookieName}=${active ? 'active' : ''}; Max-Age=${active ? 604800 : 0}; Path=/; Secure; SameSite=Lax`;
-}
-
-function hasSessionMarker() {
-  return document.cookie.split(';').some(v => v.trim() === `${AUTH_CONFIG.cookieName}=active`);
+  // Non-sensitive state marker only. HttpOnly can only be issued server-side.
+  document.cookie = `${AUTH_CONFIG.cookieName}=${active ? 'active' : ''}; Max-Age=${active ? 604800 : 0}; Path=${APP_BASE_PATH}; Secure; SameSite=Lax`;
 }
 
 export const TokenStore = Object.freeze({
   get() {
-    const token = localStorage.getItem(AUTH_CONFIG.tokenKey);
-    const expires = Number(localStorage.getItem(AUTH_CONFIG.expiresKey) || 0);
+    const token = sessionStorage.getItem(AUTH_CONFIG.tokenKey);
+    const expires = Number(sessionStorage.getItem(AUTH_CONFIG.expiresKey) || 0);
     if (!token || !expires || expires <= Date.now()) return null;
     return token;
   },
   set(token, expiresIn = 3600, scope = SCOPES) {
     const seconds = Math.max(60, Number(expiresIn) || 3600);
-    localStorage.setItem(AUTH_CONFIG.tokenKey, token);
-    localStorage.setItem(AUTH_CONFIG.expiresKey, String(Date.now() + seconds * 1000));
-    localStorage.setItem(AUTH_CONFIG.scopeKey, scope || SCOPES);
-    localStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
+    sessionStorage.setItem(AUTH_CONFIG.tokenKey, token);
+    sessionStorage.setItem(AUTH_CONFIG.expiresKey, String(Date.now() + seconds * 1000));
+    sessionStorage.setItem(AUTH_CONFIG.scopeKey, scope || SCOPES);
+    sessionStorage.setItem(AUTH_CONFIG.sessionKey, 'true');
     setSessionCookie(true);
   },
   clear() {
-    localStorage.removeItem(AUTH_CONFIG.tokenKey);
-    localStorage.removeItem(AUTH_CONFIG.expiresKey);
-    localStorage.removeItem(AUTH_CONFIG.scopeKey);
-    localStorage.removeItem(AUTH_CONFIG.profileKey);
-    localStorage.removeItem(AUTH_CONFIG.sessionKey);
     sessionStorage.removeItem(AUTH_CONFIG.tokenKey);
     sessionStorage.removeItem(AUTH_CONFIG.expiresKey);
+    sessionStorage.removeItem(AUTH_CONFIG.scopeKey);
     sessionStorage.removeItem(AUTH_CONFIG.profileKey);
     sessionStorage.removeItem(AUTH_CONFIG.sessionKey);
+    localStorage.removeItem(AUTH_CONFIG.sessionKey);
     setSessionCookie(false);
   },
-  scopes() { return (localStorage.getItem(AUTH_CONFIG.scopeKey) || '').split(/\s+/).filter(Boolean); }
+  scopes() { return (sessionStorage.getItem(AUTH_CONFIG.scopeKey) || '').split(/\s+/).filter(Boolean); }
 });
 
 export function getAccessToken() { return TokenStore.get(); }
-export function getTokenExpiry() { const value = Number(localStorage.getItem(AUTH_CONFIG.expiresKey) || 0); return value > 0 ? value : null; }
+export function getTokenExpiry() { const value = Number(sessionStorage.getItem(AUTH_CONFIG.expiresKey) || 0); return value > 0 ? value : null; }
 export function getTokenSecondsRemaining() { const expiry = getTokenExpiry(); return expiry ? Math.max(0, Math.floor((expiry - Date.now()) / 1000)) : 0; }
-export function getTokenCountdown() {
-  const totalSeconds = getTokenSecondsRemaining();
-  return { totalSeconds, minutes: Math.floor(totalSeconds / 60), seconds: totalSeconds % 60, formatted: `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}` };
-}
+export function getTokenCountdown() { const totalSeconds = getTokenSecondsRemaining(); return { totalSeconds, minutes: Math.floor(totalSeconds / 60), seconds: totalSeconds % 60, formatted: `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}` }; }
 export function isTokenExpired(bufferMs = 0) { const expiry = getTokenExpiry(); return !expiry || Date.now() + bufferMs >= expiry; }
 
 export function getProfile() { return safeJSON(localStorage.getItem(AUTH_CONFIG.profileKey) || 'null', null); }
-
 export function cacheProfile(profile) {
   if (!profile || typeof profile !== 'object') return null;
   const safe = { name: String(profile.name || ''), email: String(profile.email || ''), picture: String(profile.picture || ''), locale: String(profile.locale || '') };
@@ -137,26 +120,10 @@ export function validateToken() {
   return true;
 }
 
-export function isAuthenticated() {
-  return Boolean(validateToken() && localStorage.getItem(AUTH_CONFIG.sessionKey) === 'true');
-}
-
-function setAppAuthenticated() {
-  document.querySelector('#auth-view')?.classList.add('hidden');
-  document.querySelector('#spa-view')?.classList.remove('hidden');
-  window.dispatchEvent(new CustomEvent('auth:ready', { detail: { profile: getProfile(), expiresAt: getTokenExpiry() } }));
-}
-
-function setAppSignedOut() {
-  document.querySelector('#spa-view')?.classList.add('hidden');
-  document.querySelector('#auth-view')?.classList.remove('hidden');
-}
-
-function setStatus(message, type = '') {
-  const el = document.querySelector('#auth-status');
-  if (el) { el.textContent = message; el.className = `auth-status ${type}`; }
-}
-
+export function isAuthenticated() { return Boolean(validateToken() && sessionStorage.getItem(AUTH_CONFIG.sessionKey) === 'true'); }
+function setAppAuthenticated() { document.querySelector('#auth-view')?.classList.add('hidden'); document.querySelector('#spa-view')?.classList.remove('hidden'); window.dispatchEvent(new CustomEvent('auth:ready', { detail: { profile: getProfile(), expiresAt: getTokenExpiry() } })); }
+function setAppSignedOut() { document.querySelector('#spa-view')?.classList.add('hidden'); document.querySelector('#auth-view')?.classList.remove('hidden'); }
+function setStatus(message, type = '') { const el = document.querySelector('#auth-status'); if (el) { el.textContent = message; el.className = `auth-status ${type}`; } }
 function setLoading(value) { document.querySelector('.auth-card')?.classList.toggle('is-loading', value); }
 
 export function initializeGIS() {
@@ -175,7 +142,7 @@ export function initializeGIS() {
         try {
           TokenStore.set(response.access_token, response.expires_in, response.scope || SCOPES);
           const profile = await fetchGoogleProfile(response.access_token);
-          recordAudit('AUTH_SUCCESS', 'Google authentication completed.', { email: profile?.email || '' }, 'info');
+          recordAudit('AUTH_SUCCESS', 'Google authentication completed.', { email: profile?.email || '' });
           recordActivity('login', { email: profile?.email || '' });
           setAppAuthenticated();
           window.dispatchEvent(new CustomEvent('auth:ready', { detail: { profile, expiresAt: getTokenExpiry() } }));
@@ -220,27 +187,15 @@ export async function refreshTokenIfNeeded() {
   catch (error) { recordAudit('TOKEN_REFRESH_ERROR', 'Automatic token refresh failed.', { message: error.message }, 'warning'); return false; }
 }
 
-function stopTimers() {
-  clearTimeout(idleTimer); clearInterval(expiryTimer); idleTimer = null; expiryTimer = null;
-  idleCleanup?.(); idleCleanup = null;
-}
-
+function stopTimers() { clearTimeout(idleTimer); clearInterval(expiryTimer); idleTimer = null; expiryTimer = null; idleCleanup?.(); idleCleanup = null; }
 export function startInactivityMonitor() {
   stopTimers();
-  const reset = () => {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      recordAudit('AUTH_TIMEOUT', 'Session terminated after 15 minutes of inactivity.', {}, 'warning');
-      recordActivity('logout', { reason: 'idle-timeout' });
-      void teardownSession({ redirect: true, reason: 'idle-timeout' });
-    }, AUTH_CONFIG.idleTimeoutMs);
-  };
+  const reset = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => { recordAudit('AUTH_TIMEOUT', 'Session terminated after 15 minutes of inactivity.', {}, 'warning'); void teardownSession({ redirect: true, reason: 'idle-timeout' }); }, AUTH_CONFIG.idleTimeoutMs); };
   const events = ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'scroll'];
   events.forEach(type => window.addEventListener(type, reset, { passive: true }));
   idleCleanup = () => events.forEach(type => window.removeEventListener(type, reset));
   reset();
 }
-
 export function stopInactivityMonitor() { stopTimers(); }
 
 export function startExpiryMonitor() {
@@ -249,29 +204,24 @@ export function startExpiryMonitor() {
     const remaining = getTokenSecondsRemaining();
     window.dispatchEvent(new CustomEvent('auth:countdown', { detail: getTokenCountdown() }));
     if (remaining > 0 && remaining <= AUTH_CONFIG.refreshBeforeMs / 1000) await refreshTokenIfNeeded();
-    if (remaining === 0 && isAuthenticated()) {
-      recordAudit('AUTH_EXPIRED', 'OAuth session expired.', {}, 'warning');
-      await teardownSession({ redirect: true, reason: 'token-expired' });
-    }
+    if (remaining === 0 && isAuthenticated()) { recordAudit('AUTH_EXPIRED', 'OAuth session expired.', {}, 'warning'); await teardownSession({ redirect: true, reason: 'token-expired' }); }
   }, 1000);
 }
 
 export async function teardownSession({ redirect = false, reason = 'user' } = {}) {
-  const token = localStorage.getItem(AUTH_CONFIG.tokenKey);
+  const token = getAccessToken();
   recordAudit('AUTH_LOGOUT', 'Session termination requested.', { reason });
   recordActivity('logout', { reason });
   stopTimers();
-  if (token && window.google?.accounts?.oauth2?.revoke) {
-    try { await new Promise(resolve => window.google.accounts.oauth2.revoke(token, resolve)); } catch { /* local cleanup still proceeds */ }
-  }
+  if (token && window.google?.accounts?.oauth2?.revoke) { try { await new Promise(resolve => window.google.accounts.oauth2.revoke(token, resolve)); } catch { /* local cleanup still proceeds */ } }
   try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch { /* GIS may be absent */ }
   TokenStore.clear();
   try { sessionStorage.clear(); } catch {}
+  localStorage.removeItem(AUTH_CONFIG.profileKey);
   setAppSignedOut();
   window.dispatchEvent(new CustomEvent('auth:logout'));
-  if (redirect) window.location.replace('logout.html');
+  if (redirect) window.location.replace(`${APP_BASE_PATH}logout.html`);
 }
-
 export function clearSession() { void teardownSession({ redirect: false, reason: 'user' }); }
 
 function trackPageTransitions() {
@@ -281,29 +231,15 @@ function trackPageTransitions() {
 }
 
 export function initGoogleAuth() {
-  if (isAuthenticated()) {
-    setStatus('Session restored.', 'success');
-    startInactivityMonitor();
-    startExpiryMonitor();
-    setAppAuthenticated();
-    void fetchGoogleProfile().catch(() => {});
-    return;
-  }
+  if (isAuthenticated()) { setStatus('Session restored.', 'success'); startInactivityMonitor(); startExpiryMonitor(); setAppAuthenticated(); void fetchGoogleProfile().catch(() => {}); return; }
   const wait = () => { if (initializeGIS()) return; if (!window.google?.accounts?.oauth2) setTimeout(wait, 100); };
   wait();
   startExpiryMonitor();
 }
 
 trackPageTransitions();
-window.addEventListener('DOMContentLoaded', () => {
-  if (document.querySelector('#auth-view') || document.querySelector('#google-signin')) initGoogleAuth();
-  else if (isAuthenticated()) { startInactivityMonitor(); startExpiryMonitor(); }
-});
+window.addEventListener('DOMContentLoaded', () => { if (document.querySelector('#auth-view') || document.querySelector('#google-signin')) initGoogleAuth(); else if (isAuthenticated()) { startInactivityMonitor(); startExpiryMonitor(); } });
 
-window.AIWorkspaceAuth = Object.freeze({
-  config: AUTH_CONFIG, getAccessToken, getProfile, getTokenExpiry, getTokenSecondsRemaining, getTokenCountdown,
-  isTokenExpired, isAuthenticated, initializeGIS, requestAccessToken, refreshTokenIfNeeded,
-  recordAudit, recordActivity, startInactivityMonitor, stopInactivityMonitor, teardownSession, clearSession
-});
+window.AIWorkspaceAuth = Object.freeze({ config: AUTH_CONFIG, getAccessToken, getProfile, getTokenExpiry, getTokenSecondsRemaining, getTokenCountdown, isTokenExpired, isAuthenticated, initializeGIS, requestAccessToken, refreshTokenIfNeeded, recordAudit, recordActivity, startInactivityMonitor, stopInactivityMonitor, teardownSession, clearSession });
 
 export { CLIENT_ID, SCOPES, REQUIRED_SCOPES };
