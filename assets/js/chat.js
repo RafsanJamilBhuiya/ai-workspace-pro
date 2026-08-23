@@ -7,8 +7,6 @@ const COMMANDS = Object.freeze([
   { label: 'Sync Data', value: 'Sync Data', instant: false }
 ]);
 
-let bound = false;
-
 function elements() {
   return {
     form: document.querySelector('#chat-form'),
@@ -70,9 +68,7 @@ function populateInput(value) {
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function renderChips() {
-  const { chips } = elements();
-  if (!chips) return;
+function renderChips(chips) {
   chips.replaceChildren();
   const fragment = document.createDocumentFragment();
   for (const command of COMMANDS) {
@@ -87,8 +83,6 @@ function renderChips() {
 }
 
 async function submitMessage(text) {
-  if (handleLocalCommand(text)) return;
-
   const pending = appendMessage('Thinking…', 'assistant');
   try {
     const result = await callGemini({
@@ -104,12 +98,11 @@ async function submitMessage(text) {
 }
 
 export function initChat() {
-  if (bound) return;
   const { form, input, chips } = elements();
-  if (!form || !input || !chips) return;
-  bound = true;
+  if (!form || !input || !chips || form.dataset.chatBound === 'true') return;
 
-  renderChips();
+  form.dataset.chatBound = 'true';
+  renderChips(chips);
 
   chips.addEventListener('click', event => {
     const button = event.target.closest('[data-command]');
@@ -127,6 +120,7 @@ export function initChat() {
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
+    if (handleLocalCommand(text)) return;
     appendMessage(text, 'user');
     await submitMessage(text);
   });
