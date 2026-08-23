@@ -1,22 +1,17 @@
 {
   "name": "ai-workspace-pro",
-  "version": "1.0.0",
-  "description": "আপনার সমস্ত AI প্রজেক্টের জন্য একটি সম্পূর্ণ workspace সমাধান",
-  "main": "index.js",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A modular, client-side SPA shell for AI productivity workflows.",
+  "type": "module",
   "scripts": {
-    "dev": "node index.js",
-    "build": "echo \"Build script coming soon\"",
-    "test": "echo \"Test script coming soon\"",
-    "lint": "echo \"Lint script coming soon\""
+    "dev": "npx serve .",
+    "preview": "npx serve .",
+    "test": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js",
+    "lint": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js"
   },
-  "keywords": [
-    "ai",
-    "workspace",
-    "pro",
-    "project-management"
-  ],
-  "author": "Rafsan Jamil Bhuiya",
+  "engines": { "node": ">=18" },
+  "keywords": ["ai", "workspace", "spa", "google-oauth", "gemini", "google-apps-script"],
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": { "serve": "^14.2.4" }
 }
