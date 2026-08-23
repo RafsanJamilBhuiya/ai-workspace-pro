@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Workspace Pro - আপনার সমস্ত AI প্রজেক্টের জন্য একটি সম্পূর্ণ workspace সমাধান">
+    <meta name="keywords" content="AI, Workspace, ChatGPT, Gemini, Project Management">
+    <meta name="author" content="Rafsan Jamil Bhuiya">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Title -->
+    <title>AI Workspace Pro - স্বাগতম</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    
+    <!-- Google Identity Services Script -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="auth-container">
+        <!-- Content Wrapper -->
+        <div class="auth-card">
+            <!-- Header Section -->
+            <div class="auth-header">
+                <h1 class="auth-title">AI Workspace Pro</h1>
+                <p class="auth-subtitle">আপনার সমস্ত AI প্রজেক্টের জন্য একটি সম্পূর্ণ workspace সমাধান</p>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="auth-features">
+                <div class="feature-item">
+                    <span class="feature-icon">✨</span>
+                    <span class="feature-text">উন্নত AI ইন্টারফেস</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <span class="feature-text">প্রজেক্ট ম্যানেজমেন্ট</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔐</span>
+                    <span class="feature-text">সুরক্ষিত এবং নিরাপদ</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🚀</span>
+                    <span class="feature-text">তাৎক্ষণিক সেটআপ</span>
+                </div>
+            </div>
+            
+            <!-- Sign-In Section -->
+            <div class="auth-divider">
+                <span>Google দিয়ে সাইন ইন করুন</span>
+            </div>
+            
+            <!-- Google Sign-In Button Container -->
+            <div id="g_id_onload"
+                 data-client_id="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div id="g_id_signin" 
+                 data-type="standard" 
+                 data-size="large" 
+                 data-theme="filled_blue" 
+                 data-text="signin_with" 
+                 data-shape="rectangular" 
+                 data-logo_alignment="left" 
+                 class="google-signin-button">
+            </div>
+            
+            <!-- Error Message Display -->
+            <div id="authError" class="auth-error" style="display: none;">
+                <span id="errorMessage"></span>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div id="authLoader" class="auth-loader" style="display: none;">
+                <div class="spinner"></div>
+                <p>সাইন ইন করা হচ্ছে...</p>
+            </div>
+            
+            <!-- Footer Section -->
+            <div class="auth-footer">
+                <p class="auth-footer-text">
+                    আপনার ডেটা সম্পূর্ণভাবে সুরক্ষিত এবং এনক্রিপ্টেড থাকে।
+                </p>
+                <div class="auth-footer-links">
+                    <a href="#" class="footer-link" onclick="event.preventDefault(); alert('গোপনীয়তা নীতি');">গোপনীয়তা নীতি</a>
+                    <span class="link-separator">•</span>
+                    <a href="#" class="footer-link" onclick="event.preventDefault(); alert('সেবা শর্ত');">সেবা শর্ত</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Background Decoration -->
+        <div class="bg-decoration"></div>
+    </div>
+    
+    <!-- Authentication Script -->
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
