@@ -1,17 +1,30 @@
 {
   "name": "ai-workspace-pro",
-  "version": "2.0.0",
-  "private": true,
-  "description": "A modular, client-side SPA shell for AI productivity workflows.",
+  "version": "2.1.0",
+  "private": false,
+  "description": "Modular browser-based AI productivity SPA with Google Identity Services and Google Workspace integrations.",
   "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "dev": "npx serve .",
-    "preview": "npx serve .",
+    "dev": "serve .",
+    "preview": "serve .",
     "test": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js",
     "lint": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js"
   },
-  "engines": { "node": ">=18" },
-  "keywords": ["ai", "workspace", "spa", "google-oauth", "gemini", "google-apps-script"],
-  "license": "MIT",
-  "devDependencies": { "serve": "^14.2.4" }
+  "keywords": [
+    "ai",
+    "workspace",
+    "spa",
+    "google-oauth",
+    "google-drive",
+    "google-sheets",
+    "gemini",
+    "github-pages"
+  ],
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
 }

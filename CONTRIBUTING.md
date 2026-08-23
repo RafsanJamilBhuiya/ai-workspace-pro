@@ -1,28 +1,55 @@
 # Contributing to AI Workspace Pro
 
-Thanks for contributing. This repository favors small, reviewable changes and a clear separation between UI, authentication, routing, and API integration concerns.
+Thank you for contributing. Keep changes focused, reviewable, secure, and compatible with the static SPA architecture.
 
-## Workflow
+## Development workflow
 
-1. Fork the repository.
-2. Create a focused feature branch.
-3. Make the smallest coherent change.
-4. Run `npm test` and `npm run lint`.
-5. Verify the SPA routes manually in a browser.
-6. Open a pull request with a concise description and testing notes.
+1. Fork or create a working branch from `main`.
+2. Keep each change focused on one concern.
+3. Preserve the separation between authentication, routing, UI, and API integration.
+4. Run `npm test` before opening a pull request.
+5. Test `#/dashboard`, `#/chat`, and `#/plugins` in a browser.
+6. Verify Google OAuth behavior when authentication-related code changes.
+7. Open a pull request with a concise description and testing notes.
 
 ## Architecture rules
 
-- Keep authentication concerns in `assets/js/auth.js`.
-- Keep navigation and view rendering in `assets/js/spa-router.js`.
-- Keep external HTTP calls behind `assets/js/api-handler.js`.
-- Do not place secrets in HTML, JavaScript, CSS, or committed configuration.
-- Prefer accessible semantic HTML and progressive enhancement.
-- Keep global styles in `style.css`; authentication-only styles belong in `auth.css`.
+- `assets/js/auth.js` owns Google authentication and token lifecycle.
+- `assets/js/spa-router.js` owns hash navigation and view loading.
+- `assets/js/api-handler.js` owns external HTTP requests.
+- Keep reusable global styles in `assets/css/style.css`.
+- Keep authentication-specific styles in `assets/css/auth.css`.
+- Keep HTML semantic, accessible, responsive, and progressively enhanced.
+- Do not duplicate authentication or API logic inside individual views.
 
-## Commit conventions
+## Security requirements
 
-Use an imperative, descriptive prefix such as `feat:`, `fix:`, `refactor:`, `docs:`, or `chore:`.
+Never commit:
+
+- Gemini or other API keys;
+- OAuth client secrets;
+- service-account private keys;
+- access tokens or refresh tokens;
+- private Apps Script deployment credentials.
+
+OAuth access tokens are sensitive. Do not log token values, include them in URLs, or expose them to third-party analytics.
+
+## Code quality
+
+Use modern browser JavaScript, meaningful names, small functions, explicit error handling, and no dead placeholder code. Changes must not silently break existing DOM IDs or route contracts.
+
+## Commit messages
+
+Use an imperative prefix such as:
+
+- `feat:`
+- `fix:`
+- `refactor:`
+- `docs:`
+- `chore:`
+- `test:`
+
+Example: `fix: handle expired Google access tokens`
 
 ## Pull requests
 
@@ -32,8 +59,8 @@ Include:
 - why it changed;
 - tests/checks performed;
 - screenshots for meaningful UI changes;
-- any required environment or OAuth configuration changes.
+- required OAuth, API, or deployment configuration changes.
 
-## Security
+## Reporting security issues
 
-Never commit API keys, OAuth client secrets, service-account credentials, access tokens, or private Google Apps Script deployment information. Report security vulnerabilities privately rather than opening a public issue.
+Do not publish exploitable credentials or sensitive security details in a public issue. Contact the repository owner privately with reproduction details and remediation information.
