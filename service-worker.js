@@ -1,6 +1,11 @@
-/* AI Workspace Pro — Phase 4 PWA service worker */
-const CACHE_NAME = 'aiwp-static-v1';
-const RUNTIME_CACHE = 'aiwp-runtime-v1';
+/* AI Workspace Pro — GitHub Pages project-site service worker */
+
+// The worker is installed at /ai-workspace-pro/service-worker.js and therefore
+// must remain scoped to the project site, never the domain root.
+const BASE_PATH = new URL('./', self.registration.scope).pathname;
+const CACHE_NAME = 'aiwp-static-v2';
+const RUNTIME_CACHE = 'aiwp-runtime-v2';
+
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -20,19 +25,33 @@ const STATIC_ASSETS = [
   './assets/js/ai-guardrails.js'
 ];
 
+function inScope(url) {
+  return url.origin === self.location.origin && url.pathname.startsWith(BASE_PATH);
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(STATIC_ASSETS.map(path => new URL(path, self.registration.scope).href)))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => ![CACHE_NAME, RUNTIME_CACHE].includes(key)).map(key => caches.delete(key))))
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME && key !== RUNTIME_CACHE)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
 function isStaticRequest(request) {
-  return request.method === 'GET' && new URL(request.url).origin === self.location.origin;
+  if (request.method !== 'GET') return false;
+  return inScope(new URL(request.url));
 }
 
 self.addEventListener('fetch', event => {
@@ -48,18 +67,27 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  event.respondWith(isNavigation ? networkFirst(request, CACHE_NAME) : cacheFirst(request, CACHE_NAME));
+  event.respondWith(
+    isNavigation
+      ? networkFirst(request, CACHE_NAME)
+      : cacheFirst(request, CACHE_NAME)
+  );
 });
 
 async function cacheFirst(request, cacheName) {
   const cached = await caches.match(request);
   if (cached) return cached;
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(cacheName);
-    cache.put(request, response.clone());
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(cacheName);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response('', { status: 503, statusText: 'Offline' });
   }
-  return response;
 }
 
 async function networkFirst(request, cacheName) {
@@ -67,11 +95,19 @@ async function networkFirst(request, cacheName) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
     }
     return response;
   } catch {
-    return (await caches.match(request)) || (request.mode === 'navigate' ? caches.match('./index.html') : new Response('', { status: 503 }));
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    if (request.mode === 'navigate') {
+      const fallback = await caches.match(new URL('./index.html', self.registration.scope).href);
+      if (fallback) return fallback;
+    }
+
+    return new Response('', { status: 503, statusText: 'Offline' });
   }
 }
 
