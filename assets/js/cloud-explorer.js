@@ -76,10 +76,10 @@ async function load(container, state) {
   try {
     const response = await listDriveFiles({
       pageSize: 30,
-      orderBy: 'modifiedTime desc',
       query: 'trashed = false'
     });
-    state.files = Array.isArray(response?.files) ? response.files : [];
+    state.files = (Array.isArray(response?.files) ? response.files : [])
+      .sort((a, b) => new Date(b.modifiedTime || 0) - new Date(a.modifiedTime || 0));
     render(container, state);
   } catch (error) {
     console.error('[CloudExplorer] Failed to load files:', error);
