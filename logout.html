@@ -1,9 +1,21 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Signing out — AI Workspace Pro</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/auth.css"></head>
-<body class="auth-page"><main class="auth-shell"><section class="auth-card glass-card"><p class="eyebrow">AI Workspace Pro</p><h1>Signing out…</h1><p id="logout-status" role="status" aria-live="polite">Cleaning up the local session.</p><a id="return-link" href="index.html">Return to workspace</a></section></main>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Signing out — AI Workspace Pro</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/auth.css"></head>
+<body class="auth-page">
+<main class="auth-shell"><section class="auth-card glass-card logout-card" aria-live="polite"><div class="brand-mark">AI</div><p class="eyebrow">SECURE SESSION</p><h1>Signing you out…</h1><p id="logout-status">Revoking authentication and cleaning local session state.</p><a id="return-link" href="index.html" hidden>Return to workspace</a></section></main>
 <script type="module">
-  import { clearSession } from './assets/js/auth.js';
-  const status = document.getElementById('logout-status');
-  try { clearSession(); status.textContent = 'Session cleared. Redirecting…'; setTimeout(() => { location.replace('index.html'); }, 500); }
-  catch (error) { status.textContent = `Local cleanup failed: ${error.message}`; }
-</script></body></html>
+import { teardownSession } from './assets/js/auth.js';
+const status=document.getElementById('logout-status'), link=document.getElementById('return-link');
+try {
+  // teardownSession revokes the current token when GIS is available, disables GIS auto-select,
+  // removes app token/profile/session data, clears sessionStorage, removes the app cookie, and redirects.
+  await teardownSession({redirect:false,reason:'logout-page'});
+  status.textContent='Session cleared successfully. Returning to AI Workspace Pro…';
+  setTimeout(()=>location.replace('index.html'),500);
+} catch(error) {
+  status.textContent=`Local session cleanup failed: ${error?.message||'Unknown error'}`;
+  link.hidden=false;
+}
+</script>
+</body>
+</html>
