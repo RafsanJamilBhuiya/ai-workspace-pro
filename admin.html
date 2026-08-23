@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — AI Workspace Pro</title>
+  <link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header glass"><a href="index.html#/dashboard" class="brand">AI Workspace Pro</a><nav aria-label="Admin navigation"><a href="index.html#/dashboard">Dashboard</a><a href="plugins.html">Plugins</a><a href="log.html">Logs</a></nav></header>
+  <main class="page-shell"><section class="glass-card"><p class="eyebrow">System management</p><h1>Platform Admin</h1><p>Operational controls and runtime diagnostics for the workspace.</p>
+    <div class="metric-grid"><article class="glass-card"><h2>Authentication</h2><p id="auth-state">Checking…</p></article><article class="glass-card"><h2>Runtime</h2><p id="runtime-state">Browser ES Modules</p></article><article class="glass-card"><h2>Pages</h2><p id="pages-state">GitHub Pages</p></article></div>
+    <div class="action-row"><button id="clear-session" class="btn btn-secondary" type="button">Clear local session</button><a class="btn btn-secondary" href="log.html">Open system log</a></div>
+  </section></main>
+  <script type="module">
+    const token = localStorage.getItem('ai_workspace_access_token');
+    document.getElementById('auth-state').textContent = token ? 'Token present' : 'Signed out';
+    document.getElementById('clear-session').addEventListener('click', () => { localStorage.removeItem('ai_workspace_access_token'); localStorage.removeItem('ai_workspace_token_expiry'); location.reload(); });
+  </script>
+</body></html>
