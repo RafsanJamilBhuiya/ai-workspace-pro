@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0f172a">
 <meta name="description" content="AI Workspace Pro — modular AI productivity workspace">
 <meta name="google-client-id" content="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://accounts.google.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://cdn.tailwindcss.com; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com; frame-src https://accounts.google.com; worker-src 'self' blob:; upgrade-insecure-requests">
 <title>AI Workspace Pro</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -81,6 +82,13 @@ document.querySelector('#drawer-signout')?.addEventListener('click', () => { set
 document.querySelector('#desktop-signout')?.addEventListener('click', clearSession);
 document.addEventListener('keydown', event => { if (event.key === 'Escape') setDrawerState(false); });
 window.addEventListener('auth:logout', () => setDrawerState(false));
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+      .catch(error => window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', { message: error.message }, 'warning'));
+  }, { once: true });
+}
 </script>
 </body>
 </html>
