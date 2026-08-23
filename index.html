@@ -22,7 +22,7 @@
 <div class="brand-mark" aria-hidden="true">AI</div>
 <h1 id="auth-title">AI Workspace Pro</h1>
 <p class="muted">Sign in with Google to enter your workspace.</p>
-<div id="google-signin" class="google-signin" aria-label="Google sign in"></div>
+<button id="google-signin" class="google-signin" type="button" aria-label="Sign in with Google">Sign in with Google</button>
 <p id="auth-status" class="auth-status" role="status" aria-live="polite">Initializing Google Identity Services…</p>
 </section>
 </main>
@@ -57,12 +57,14 @@
 <script type="module" src="./assets/js/auth.js"></script>
 <script type="module" src="./assets/js/spa-router.js"></script>
 <script type="module">
-import { clearSession } from './assets/js/auth.js';
+import { clearSession, requestAccessToken, isAuthenticated } from './assets/js/auth.js';
 
 const toggle = document.querySelector('#mobile-menu-toggle');
 const drawer = document.querySelector('#mobile-drawer');
 const backdrop = document.querySelector('#drawer-backdrop');
 const closeButton = document.querySelector('#drawer-close');
+const signInButton = document.querySelector('#google-signin');
+const authStatus = document.querySelector('#auth-status');
 
 function setDrawerState(open) {
   if (!drawer || !backdrop || !toggle) return;
@@ -78,10 +80,31 @@ toggle?.addEventListener('click', () => setDrawerState(!drawer.classList.contain
 closeButton?.addEventListener('click', () => setDrawerState(false));
 backdrop?.addEventListener('click', () => setDrawerState(false));
 drawer?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setDrawerState(false)));
-document.querySelector('#drawer-signout')?.addEventListener('click', () => { setDrawerState(false); clearSession(); });
+drawer?.querySelector('#drawer-signout')?.addEventListener('click', () => { setDrawerState(false); clearSession(); });
 document.querySelector('#desktop-signout')?.addEventListener('click', clearSession);
 document.addEventListener('keydown', event => { if (event.key === 'Escape') setDrawerState(false); });
 window.addEventListener('auth:logout', () => setDrawerState(false));
+
+// The GIS token client is initialized by auth.js. The sign-in control must
+// explicitly call requestAccessToken(); merely loading the GIS library does not
+// open the OAuth consent/account picker.
+signInButton?.addEventListener('click', async () => {
+  if (isAuthenticated()) return;
+  signInButton.disabled = true;
+  signInButton.setAttribute('aria-busy', 'true');
+  if (authStatus) authStatus.textContent = 'Opening Google sign-in…';
+  try {
+    await requestAccessToken({ prompt: 'select_account' });
+  } catch (error) {
+    if (authStatus) {
+      authStatus.textContent = error?.message || 'Google sign-in failed. Please try again.';
+      authStatus.className = 'auth-status error';
+    }
+  } finally {
+    signInButton.disabled = false;
+    signInButton.removeAttribute('aria-busy');
+  }
+});
 
 // GitHub Pages project-site registration: the explicit scope keeps the worker
 // confined to /ai-workspace-pro/ instead of the domain root.
@@ -89,14 +112,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/ai-workspace-pro/service-worker.js', { scope: '/ai-workspace-pro/' })
       .then(registration => {
-        window.AIWorkspaceAuth?.recordAudit?.('PWA_READY', 'Service worker registered.', {
-          scope: registration.scope
-        });
+        window.AIWorkspaceAuth?.recordAudit?.('PWA_READY', 'Service worker registered.', { scope: registration.scope });
       })
       .catch(error => {
-        window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', {
-          message: error.message
-        }, 'warning');
+        window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', { message: error.message }, 'warning');
       });
   }, { once: true });
 }
