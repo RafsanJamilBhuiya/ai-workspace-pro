@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Explorer — AI Workspace Pro</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header glass">
+    <a href="index.html#/dashboard" class="brand">AI Workspace Pro</a>
+    <nav aria-label="API navigation"><a href="index.html#/chat">Chat</a><a href="index.html#/plugins">Plugins</a><a href="index.html#/dashboard">Dashboard</a></nav>
+  </header>
+  <main class="page-shell">
+    <section class="glass-card">
+      <div class="section-heading"><div><p class="eyebrow">Developer surface</p><h1>API Explorer</h1><p>Inspect Google Drive and Google Sheets responses without mixing raw data into the assistant chat preview.</p></div><button id="refresh-api" class="btn btn-primary" type="button">Refresh</button></div>
+      <div id="api-status" role="status" aria-live="polite">Ready.</div>
+      <div class="api-grid">
+        <article class="glass-card"><h2>Drive files</h2><pre id="drive-output" aria-label="Raw Google Drive response">No data loaded.</pre></article>
+        <article class="glass-card"><h2>Spreadsheet data</h2><pre id="sheet-output" aria-label="Raw Google Sheets response">Select a spreadsheet to inspect its data.</pre></article>
+      </div>
+    </section>
+  </main>
+  <script type="module">
+    import { listDriveFiles, getSpreadsheet } from './assets/js/api-handler.js';
+    const $ = id => document.getElementById(id);
+    async function load() {
+      $('api-status').textContent = 'Loading authenticated API data…';
+      try {
+        const files = await listDriveFiles({ pageSize: 50 });
+        $('drive-output').textContent = JSON.stringify(files, null, 2);
+        $('api-status').textContent = 'Drive response loaded. Use a spreadsheet ID in the console to inspect Sheets.';
+      } catch (error) {
+        $('drive-output').textContent = JSON.stringify({ error: error.message }, null, 2);
+        $('api-status').textContent = error.message;
+      }
+    }
+    $('refresh-api').addEventListener('click', load);
+    window.apiExplorer = { inspectSpreadsheet: async (id, range) => { const data = await getSpreadsheet(id, range); $('sheet-output').textContent = JSON.stringify(data, null, 2); return data; } };
+    if (localStorage.getItem('ai_workspace_access_token')) load();
+  </script>
+</body>
+</html>
