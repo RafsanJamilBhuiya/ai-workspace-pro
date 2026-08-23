@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>System Log — AI Workspace Pro</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/responsive.css"></head>
+<body><header class="site-header glass"><a href="index.html#/dashboard" class="brand">AI Workspace Pro</a><nav aria-label="Log navigation"><a href="index.html#/chat">Chat</a><a href="admin.html">Admin</a></nav></header><main class="page-shell"><section class="glass-card"><div class="section-heading"><div><p class="eyebrow">Diagnostics</p><h1>System Log</h1><p>Browser-side audit events captured by this page. Server logs are not exposed here.</p></div><button id="clear-log" class="btn btn-secondary" type="button">Clear</button></div><pre id="log-output" role="log" aria-live="polite">Loading…</pre></section></main>
+<script type="module">
+  const KEY = 'ai-workspace.audit-log'; const out = document.getElementById('log-output');
+  function render(){ try { const data = JSON.parse(localStorage.getItem(KEY) || '[]'); out.textContent = data.length ? data.map(e => `[${e.time}] ${e.type}: ${e.message}`).join('\n') : 'No browser audit events recorded.'; } catch { out.textContent = 'Audit log is unavailable.'; } }
+  document.getElementById('clear-log').addEventListener('click', () => { localStorage.removeItem(KEY); render(); }); render();
+  window.addEventListener('storage', event => { if (event.key === KEY) render(); });
+</script></body></html>
