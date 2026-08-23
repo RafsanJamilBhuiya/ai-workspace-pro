@@ -1,30 +1,28 @@
 {
   "name": "ai-workspace-pro",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": false,
-  "description": "Modular browser-based AI productivity SPA with Google Identity Services and Google Workspace integrations.",
+  "description": "Modular browser-based AI productivity SPA with Google Identity Services, PWA resilience and production CI/CD.",
   "type": "module",
   "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
+  "engines": { "node": ">=18" },
   "scripts": {
     "dev": "serve .",
     "preview": "serve .",
-    "test": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js",
-    "lint": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js"
+    "test": "node --check assets/js/auth.js && node --check assets/js/spa-router.js && node --check assets/js/api-handler.js && node --check assets/js/request-queue.js && node --check assets/js/error-resilience.js && node --check assets/js/ai-guardrails.js && node --check service-worker.js",
+    "lint": "npm test",
+    "build": "node -e \"console.log('Static production build: no bundling step required.')\""
   },
   "keywords": [
     "ai",
     "workspace",
     "spa",
+    "pwa",
     "google-oauth",
     "google-drive",
     "google-sheets",
     "gemini",
     "github-pages"
   ],
-  "devDependencies": {
-    "serve": "^14.2.4"
-  }
+  "devDependencies": { "serve": "^14.2.4" }
 }
