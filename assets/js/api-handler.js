@@ -1,4 +1,4 @@
-import { getAccessToken, clearStoredToken } from './auth.js';
+import { getAccessToken, clearSession } from './auth.js';
 
 const GOOGLE_DRIVE_API = 'https://www.googleapis.com/drive/v3';
 const GOOGLE_SHEETS_API = 'https://sheets.googleapis.com/v4';
@@ -55,7 +55,7 @@ export async function request(url, options = {}) {
 
   if (response.status === 401 || response.status === 403) {
     if (response.status === 401) {
-      clearStoredToken();
+      clearSession();
     }
     const error = new Error(
       response.status === 401
