@@ -11,9 +11,9 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{workspace:{950:'#0f172a',900:'#1e293b',400:'#38bdf8'}}}}};</script>
-<link rel="stylesheet" href="assets/css/style.css">
-<link rel="stylesheet" href="assets/css/auth.css">
-<link rel="stylesheet" href="assets/css/responsive.css">
+<link rel="stylesheet" href="./assets/css/style.css">
+<link rel="stylesheet" href="./assets/css/auth.css">
+<link rel="stylesheet" href="./assets/css/responsive.css">
 </head>
 <body>
 <div id="app" class="min-h-screen">
@@ -54,8 +54,8 @@
 <main id="spa-view" class="hidden" aria-live="polite"></main>
 </div>
 <noscript>JavaScript is required to use AI Workspace Pro.</noscript>
-<script type="module" src="assets/js/auth.js"></script>
-<script type="module" src="assets/js/spa-router.js"></script>
+<script type="module" src="./assets/js/auth.js"></script>
+<script type="module" src="./assets/js/spa-router.js"></script>
 <script type="module">
 import { clearSession } from './assets/js/auth.js';
 
@@ -83,10 +83,21 @@ document.querySelector('#desktop-signout')?.addEventListener('click', clearSessi
 document.addEventListener('keydown', event => { if (event.key === 'Escape') setDrawerState(false); });
 window.addEventListener('auth:logout', () => setDrawerState(false));
 
+// GitHub Pages project-site registration: the explicit scope keeps the worker
+// confined to /ai-workspace-pro/ instead of the domain root.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-      .catch(error => window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', { message: error.message }, 'warning'));
+    navigator.serviceWorker.register('/ai-workspace-pro/service-worker.js', { scope: '/ai-workspace-pro/' })
+      .then(registration => {
+        window.AIWorkspaceAuth?.recordAudit?.('PWA_READY', 'Service worker registered.', {
+          scope: registration.scope
+        });
+      })
+      .catch(error => {
+        window.AIWorkspaceAuth?.recordAudit?.('PWA_ERROR', 'Service worker registration failed.', {
+          message: error.message
+        }, 'warning');
+      });
   }, { once: true });
 }
 </script>
