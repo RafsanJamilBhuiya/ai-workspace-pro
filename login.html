@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="google-client-id" content="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com">
+  <meta name="robots" content="noindex,nofollow">
   <title>Sign in — AI Workspace Pro</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/auth.css">
@@ -11,26 +12,52 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="auth-page">
-  <main class="auth-shell">
-    <section class="auth-card glass-card" aria-labelledby="login-title">
-      <p class="eyebrow">AI Workspace Pro</p>
-      <h1 id="login-title">Sign in with Google</h1>
-      <p>Authorize Drive and Sheets access for your workspace.</p>
-      <div id="google-signin" aria-label="Google sign in"></div>
-      <p id="auth-status" class="auth-status" role="status" aria-live="polite">Loading authentication…</p>
-      <a href="index.html#/dashboard">Return to workspace</a>
-    </section>
-  </main>
-  <script type="module">
-    import { initGoogleAuth, isAuthenticated } from './assets/js/auth.js';
-    const status = document.getElementById('auth-status');
-    if (isAuthenticated()) status.textContent = 'An active session already exists.';
-    window.addEventListener('auth:ready', () => {
-      status.textContent = 'Signed in successfully.';
-      setTimeout(() => { location.href = 'index.html#/dashboard'; }, 250);
-    }, { once: true });
-    try { initGoogleAuth(); }
-    catch (error) { status.textContent = error.message || 'Authentication configuration is unavailable.'; }
-  </script>
+<main class="auth-shell">
+<section class="auth-card glass-card" aria-labelledby="login-title">
+  <div class="brand-mark" aria-hidden="true">AI</div>
+  <div class="auth-brand-text"><strong>AI Workspace Pro</strong><span>Secure Workspace</span></div>
+  <div id="loading-state" class="auth-loading"><span class="spinner" aria-hidden="true"></span><span>Checking session…</span></div>
+
+  <div id="login-state" hidden>
+    <p class="eyebrow">SECURE ACCESS</p>
+    <h1 id="login-title">Sign in to your workspace</h1>
+    <p class="auth-copy">Authorize Google Drive and Sheets access for your workspace.</p>
+    <div id="auth-error" class="auth-alert auth-alert-error" role="alert" hidden></div>
+    <div id="google-signin" class="google-signin" aria-label="Google sign in"></div>
+    <p class="auth-security-note">OAuth access tokens remain client-side for this static GitHub Pages architecture. HttpOnly cookies require a server-side session.</p>
+  </div>
+
+  <div id="session-state" hidden>
+    <p class="eyebrow">ACTIVE SESSION</p>
+    <h1>Welcome back</h1>
+    <div class="session-preview">
+      <img id="session-picture" src="" alt="" width="64" height="64" referrerpolicy="no-referrer">
+      <div><strong id="session-name">Authenticated user</strong><span id="session-email"></span><small id="session-expiry"></small></div>
+    </div>
+    <div class="session-actions">
+      <a class="button button-primary" href="index.html#/dashboard">Open Dashboard</a>
+      <button id="switch-account" class="button button-secondary" type="button">Switch Account</button>
+      <button id="logout-button" class="button button-danger" type="button">Sign Out</button>
+    </div>
+  </div>
+  <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+  <footer class="auth-footer"><a href="index.html">Back to home</a></footer>
+</section>
+</main>
+<script type="module">
+import { isAuthenticated, getProfile, getTokenCountdown, requestAccessToken, teardownSession, initGoogleAuth } from './assets/js/auth.js';
+const loading=document.getElementById('loading-state'), login=document.getElementById('login-state'), session=document.getElementById('session-state'), errorBox=document.getElementById('auth-error'), status=document.getElementById('auth-status');
+const picture=document.getElementById('session-picture'), name=document.getElementById('session-name'), email=document.getElementById('session-email'), expiry=document.getElementById('session-expiry');
+const show=(el)=>el.hidden=false, hide=(el)=>el.hidden=true;
+function renderSession(){const p=getProfile(); if(!p){renderLogin();return;} name.textContent=p.name||'Authenticated user'; email.textContent=p.email||''; picture.src=p.picture||''; picture.alt=p.name?`${p.name} profile`:'Profile picture'; hide(loading);hide(login);show(session);status.textContent='';}
+function renderLogin(){hide(loading);hide(session);show(login);}
+function countdown(){if(!session.hidden) expiry.textContent=`Token: ${getTokenCountdown().formatted} remaining`;}
+document.getElementById('google-signin').addEventListener('click',async()=>{errorBox.hidden=true;try{await requestAccessToken({prompt:'select_account'});renderSession();}catch(e){errorBox.textContent=e?.message||'Google authentication failed.';errorBox.hidden=false;}});
+document.getElementById('logout-button').addEventListener('click',()=>teardownSession({redirect:true,reason:'user'}));
+document.getElementById('switch-account').addEventListener('click',async()=>{await teardownSession({redirect:false,reason:'switch-account'});renderLogin();});
+window.addEventListener('auth:ready',renderSession); window.addEventListener('auth:profile',renderSession); window.addEventListener('auth:countdown',countdown);
+if(isAuthenticated()){renderSession();initGoogleAuth();}else{renderLogin();initGoogleAuth();}
+setInterval(countdown,1000);
+</script>
 </body>
 </html>
