@@ -1,9 +1,9 @@
 <section class="page-view chat-view">
-  <header class="page-header"><div><p class="eyebrow">AI</p><h1>Chat</h1><p class="muted">Use slash commands for fast workspace actions.</p></div></header>
-  <div id="chat-log" class="glass-panel chat-log" aria-live="polite"><div class="message assistant">Welcome. Try <code>/help</code>, <code>/clear</code>, or ask a question.</div></div>
-  <form id="chat-form" class="glass-panel chat-form">
-    <label class="sr-only" for="chat-input">Message</label>
-    <textarea id="chat-input" rows="3" placeholder="Message AI…  /help" autocomplete="off"></textarea>
-    <div class="chat-actions"><span id="chat-hint" class="muted">Enter to send · Shift+Enter for newline</span><button class="button" type="submit">Send</button></div>
-  </form>
+<header class="page-header"><div><p class="eyebrow">AI Assistant</p><h1>Chat</h1><p class="muted">Send natural-language requests or use slash commands.</p></div></header>
+<div id="chat-log" class="glass-panel chat-log" role="log" aria-live="polite" aria-label="Chat history"><div class="message assistant">Welcome. Try <code>/help</code>, <code>/clear</code>, or ask a question.</div></div>
+<form id="chat-form" class="glass-panel chat-form" autocomplete="off">
+<label class="sr-only" for="chat-input">Message</label>
+<textarea id="chat-input" rows="3" maxlength="12000" placeholder="Message AI…  /help"></textarea>
+<div class="chat-actions"><span id="chat-hint" class="muted">Enter to send · Shift+Enter for newline</span><button id="chat-send" class="button" type="submit">Send</button></div>
+</form>
 </section>

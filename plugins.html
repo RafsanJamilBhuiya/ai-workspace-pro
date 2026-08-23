@@ -1,8 +1,9 @@
 <section class="page-view">
-  <header class="page-header"><div><p class="eyebrow">Integrations</p><h1>Plugins</h1><p class="muted">Connect Google Drive and Sheets through a trusted Google Apps Script endpoint.</p></div></header>
-  <div class="card-grid">
-    <article class="glass-panel integration-card"><div><h2>Google Drive</h2><p class="muted">List and manage workspace files through your configured GAS service.</p></div><span class="status-pill">Configurable</span></article>
-    <article class="glass-panel integration-card"><div><h2>Google Sheets</h2><p class="muted">Read and write structured workspace data through the same controlled API boundary.</p></div><span class="status-pill">Configurable</span></article>
-  </div>
-  <section class="glass-panel content-card"><h2>Runtime endpoint</h2><p class="muted">Set <code>window.__AI_WORKSPACE_CONFIG__.gasEndpoint</code> before making integration requests. Do not place service credentials in this file.</p></section>
+<header class="page-header"><div><p class="eyebrow">Integrations</p><h1>Plugins</h1><p class="muted">Manage Google Drive, Google Sheets, and Apps Script connections.</p></div></header>
+<section class="card-grid integration-grid">
+<article class="glass-panel integration-card"><div><h2>Google Drive</h2><p class="muted">Use the authorized Google session for Drive operations.</p></div><label class="switch"><input id="drive-toggle" type="checkbox" checked><span class="switch-slider"></span></label><span class="status-pill success">Authorized</span></article>
+<article class="glass-panel integration-card"><div><h2>Google Sheets</h2><p class="muted">Use the authorized Google session for spreadsheet operations.</p></div><label class="switch"><input id="sheets-toggle" type="checkbox" checked><span class="switch-slider"></span></label><span class="status-pill success">Authorized</span></article>
+<article class="glass-panel integration-card"><div><h2>Google Apps Script</h2><p class="muted">Connect a controlled server-side automation endpoint.</p><label for="gas-endpoint" class="field-label">Runtime endpoint</label><input id="gas-endpoint" class="input" type="url" placeholder="https://script.google.com/macros/s/…/exec"></div><label class="switch"><input id="gas-toggle" type="checkbox"><span class="switch-slider"></span></label><span class="status-pill">Configurable</span></article>
+</section>
+<section class="glass-panel content-card"><p class="eyebrow">Security</p><h2>Credential boundary</h2><p class="muted">Keep Gemini credentials and service secrets on a trusted backend or Apps Script endpoint. The browser stores only the OAuth access token required by the current session.</p></section>
 </section>

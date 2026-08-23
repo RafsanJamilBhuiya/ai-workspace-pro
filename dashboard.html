@@ -1,12 +1,13 @@
-<section class="page-view">
-  <header class="page-header">
-    <div><p class="eyebrow">Workspace</p><h1>Dashboard</h1><p class="muted">Your AI workspace at a glance.</p></div>
-    <a class="button" href="#/chat">Open AI Chat</a>
-  </header>
-  <div class="card-grid">
-    <article class="glass-panel stat-card"><span class="muted">Workspace status</span><strong>Ready</strong><p>Authentication and routing are active.</p></article>
-    <article class="glass-panel stat-card"><span class="muted">AI surface</span><strong>Gemini-ready</strong><p>Connect a trusted API proxy to enable generation.</p></article>
-    <article class="glass-panel stat-card"><span class="muted">Integrations</span><strong>Drive + Sheets</strong><p>Configure Google Apps Script endpoints in runtime settings.</p></article>
-  </div>
-  <section class="glass-panel content-card"><h2>Quick start</h2><ul class="clean-list"><li>Use <a href="#/chat">Chat</a> for AI workflows.</li><li>Use <a href="#/plugins">Plugins</a> to configure Google integrations.</li><li>Keep secrets on the server side.</li></ul></section>
+<section class="page-view dashboard-view">
+<header class="page-header"><div><p class="eyebrow">Workspace</p><h1>Dashboard</h1><p class="muted">Monitor authentication, AI readiness, and connected productivity services.</p></div><span class="status-pill success"><span class="status-dot"></span>Session active</span></header>
+<section class="card-grid metrics-grid" aria-label="Workspace metrics">
+<article class="glass-panel stat-card"><span class="muted">Workspace</span><strong>Ready</strong><p>SPA authentication and routing are active.</p></article>
+<article class="glass-panel stat-card"><span class="muted">AI surface</span><strong>Gemini-ready</strong><p>Requests are routed through the configured API boundary.</p></article>
+<article class="glass-panel stat-card"><span class="muted">Google services</span><strong>Drive + Sheets</strong><p>OAuth scopes are available to the authorized session.</p></article>
+<article class="glass-panel stat-card"><span class="muted">Session</span><strong>Authenticated</strong><p>Access-token state is maintained by the auth module.</p></article>
+</section>
+<section class="dashboard-grid">
+<article class="glass-panel content-card"><p class="eyebrow">Quick actions</p><h2>Start working</h2><div class="quick-actions"><a class="action-card" href="#/chat"><strong>Open AI Chat</strong><span class="muted">Ask questions or use slash commands.</span></a><a class="action-card" href="#/plugins"><strong>Manage Integrations</strong><span class="muted">Review Drive, Sheets, and GAS configuration.</span></a></div></article>
+<article class="glass-panel content-card"><p class="eyebrow">Session status</p><h2>Security state</h2><div class="status-list"><div class="status-row"><span>Google OAuth</span><span class="status-pill success">Active</span></div><div class="status-row"><span>SPA router</span><span class="status-pill success">Ready</span></div><div class="status-row"><span>API boundary</span><span class="status-pill">Configurable</span></div></div></article>
+</section>
 </section>

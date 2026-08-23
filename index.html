@@ -1,33 +1,33 @@
 <!doctype html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#020617">
-  <meta name="description" content="AI Workspace Pro — modular AI productivity workspace">
-  <meta name="google-client-id" content="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com">
-  <title>AI Workspace Pro</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:'class',theme:{extend:{}}};</script>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/auth.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="AI Workspace Pro — modular AI productivity workspace">
+<meta name="google-client-id" content="1009455911830-sd9jb0mq47iobfqcnmlnbec43padb0oe.apps.googleusercontent.com">
+<title>AI Workspace Pro</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{workspace:{950:'#0f172a',900:'#1e293b',400:'#38bdf8'}}}}};</script>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/auth.css">
 </head>
 <body>
-  <div id="app" class="min-h-screen">
-    <main id="auth-view" class="auth-shell">
-      <section class="auth-card glass-panel" aria-labelledby="auth-title">
-        <div class="brand-mark" aria-hidden="true">AI</div>
-        <h1 id="auth-title">AI Workspace Pro</h1>
-        <p class="muted">Sign in with Google to enter your workspace.</p>
-        <div id="google-signin" class="google-signin" aria-label="Google sign in"></div>
-        <p id="auth-status" class="auth-status" role="status">Initializing Google Identity Services…</p>
-      </section>
-    </main>
-    <main id="spa-view" class="hidden"></main>
-  </div>
-  <noscript>JavaScript is required to use AI Workspace Pro.</noscript>
-  <script type="module" src="assets/js/auth.js"></script>
-  <script type="module" src="assets/js/spa-router.js"></script>
+<div id="app" class="min-h-screen">
+<main id="auth-view" class="auth-shell">
+<section class="auth-card glass-panel" aria-labelledby="auth-title">
+<div class="brand-mark" aria-hidden="true">AI</div>
+<h1 id="auth-title">AI Workspace Pro</h1>
+<p class="muted">Sign in with Google to enter your workspace.</p>
+<div id="google-signin" class="google-signin" aria-label="Google sign in"></div>
+<p id="auth-status" class="auth-status" role="status" aria-live="polite">Initializing Google Identity Services…</p>
+</section>
+</main>
+<main id="spa-view" class="hidden" aria-live="polite"></main>
+</div>
+<noscript>JavaScript is required to use AI Workspace Pro.</noscript>
+<script type="module" src="assets/js/auth.js"></script>
+<script type="module" src="assets/js/spa-router.js"></script>
 </body>
 </html>
