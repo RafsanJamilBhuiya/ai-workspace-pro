@@ -1,65 +1,71 @@
 # AI Workspace Pro
 
-**আপনার সমস্ত AI প্রজেক্টের জন্য একটি সম্পূর্ণ workspace সমাধান**
+AI Workspace Pro is a lightweight, modular Single Page Application (SPA) shell for AI productivity workflows. It provides Google Identity Services authentication, hash-based navigation, a chat surface with slash commands, and an integration manager for Google Drive/Sheets through a controlled API boundary.
 
-## 🚀 বৈশিষ্ট্যসমূহ
+## Architecture
 
-- ✨ সহজ এবং শক্তিশালী ইন্টারফেস
-- 🤖 AI-চালিত কর্মপ্রবাহ
-- 📊 প্রজেক্ট ম্যানেজমেন্ট
-- 🔐 নিরাপদ এবং মডুলার আর্কিটেকচার
-- 🌐 ক্লাউড-ভিত্তিক সমাধান
+```text
+index.html                 SPA shell + Google GIS
+├── dashboard.html         protected dashboard template
+├── chat.html              AI chat template + slash commands
+├── plugins.html           Drive/Sheets integration manager
+└── assets/
+    ├── css/style.css      global theme + glassmorphism
+    ├── css/auth.css       authentication UI + spinner
+    └── js/
+        ├── auth.js        Google OAuth token lifecycle
+        ├── spa-router.js  hash router + protected views
+        └── api-handler.js API/GAS fetch boundary
+```
 
-## 📦 প্রয়োজনীয়তা
+## Routes
 
-- Node.js ≥ 16.0.0
-- npm ≥ 8.0.0
-- Git ≥ 2.30.0
+- `#/dashboard` — workspace overview
+- `#/chat` — AI chat and slash-command surface
+- `#/plugins` — Google Drive/Sheets integration manager
 
-## 🛠️ ইনস্টলেশন
+The standalone HTML files are templates and documentation-friendly entry points; the shell renders them into the SPA through the router.
+
+## Authentication
+
+Google Identity Services is loaded from Google's official client library. Configure an OAuth 2.0 Web client and add the deployed origin to its authorized JavaScript origins. The current shell reads the client ID from the `google-client-id` meta tag in `index.html`.
+
+The requested architecture includes a LocalStorage token manager. For production deployments, prefer short-lived access tokens and never store client secrets or API keys in browser storage.
+
+## API boundary
+
+`assets/js/api-handler.js` intentionally avoids hard-coding a Gemini API key. Configure a trusted backend/proxy or Google Apps Script endpoint through runtime configuration. Browser code should send user credentials only through HTTPS and should not expose server-side secrets.
+
+Example runtime configuration:
+
+```js
+window.__AI_WORKSPACE_CONFIG__ = {
+  apiBaseUrl: '/api',
+  gasEndpoint: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec'
+};
+```
+
+## Local development
 
 ```bash
-# Repository clone করুন
-git clone https://github.com/RafsanJamilBhuiya/ai-workspace-pro.git
-
-# Directory-তে যান
-cd ai-workspace-pro
-
-# Dependencies install করুন
 npm install
-```
-
-## 🚀 দ্রুত শুরু করুন
-
-```bash
-# Development সার্ভার চালান
 npm run dev
-
-# Build করুন
-npm run build
-
-# Test চালান
-npm test
 ```
 
-## 📖 ডকুমেন্টেশন
+Then open the local URL printed by `serve`.
 
-- [আর্কিটেকচার](./docs/ARCHITECTURE.md)
-- [API রেফারেন্স](./docs/API.md)
-- [কন্ট্রিবিউটিং গাইড](./CONTRIBUTING.md)
+## Security notes
 
-## 📝 লাইসেন্স
+- Never commit Gemini API keys, OAuth client secrets, service-account keys, or GAS deployment secrets.
+- Use HTTPS in production.
+- Restrict OAuth origins and redirect configuration to trusted domains.
+- Treat access tokens as sensitive and keep their lifetime minimal.
+- Put privileged Gemini/GAS operations behind a server-side authorization boundary.
 
-এই প্রজেক্টটি MIT লাইসেন্সের অধীন। বিস্তারিত জানতে [LICENSE](./LICENSE) দেখুন।
+## Contributing
 
-## 🤝 অবদান রাখুন
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-আমরা সব ধরনের অবদানের স্বাগত জানাই! [CONTRIBUTING.md](./CONTRIBUTING.md) পড়ুন এবং শুরু করুন।
+## License
 
-## 📞 যোগাযোগ
-
-প্রশ্ন বা পরামর্শ থাকলে [Issues](https://github.com/RafsanJamilBhuiya/ai-workspace-pro/issues) খুলুন।
-
----
-
-**Made with ❤️ by Rafsan Jamil Bhuiya**
+MIT — see [LICENSE](./LICENSE).
