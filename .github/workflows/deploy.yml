@@ -1,0 +1,77 @@
+name: Production CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-production
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  validate:
+    name: Validate static application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Validate package metadata
+        run: node -e "const p=require('./package.json'); if(!p.name||!p.scripts?.test) process.exit(1)"
+
+      - name: Syntax and security checks
+        run: npm test
+
+      - name: Verify required production files
+        run: |
+          test -f index.html
+          test -f service-worker.js
+          test -f assets/js/auth.js
+          test -f assets/js/request-queue.js
+          test -f assets/js/error-resilience.js
+          test -f assets/js/ai-guardrails.js
+
+      - name: Scan for accidentally committed secret patterns
+        run: |
+          ! grep -RInE --exclude-dir=.git --exclude='*.map' '(BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,})' .
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
