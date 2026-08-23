@@ -1,37 +1,39 @@
-# অবদান রাখার নির্দেশিকা
+# Contributing to AI Workspace Pro
 
-আমরা আপনার অবদানের জন্য কৃতজ্ঞ! এই গাইডটি অনুসরণ করুন।
+Thanks for contributing. This repository favors small, reviewable changes and a clear separation between UI, authentication, routing, and API integration concerns.
 
-## পূর্বশর্ত
+## Workflow
 
-- এই রেপোজিটরি ফর্ক করুন
-- আপনার ফর্ক করা রেপোজিটরি ক্লোন করুন
-- একটি নতুন branch তৈরি করুন
+1. Fork the repository.
+2. Create a focused feature branch.
+3. Make the smallest coherent change.
+4. Run `npm test` and `npm run lint`.
+5. Verify the SPA routes manually in a browser.
+6. Open a pull request with a concise description and testing notes.
 
-## কোডিং মান
+## Architecture rules
 
-- **Code Style**: ESLint এবং Prettier ব্যবহার করুন
-- **Commit Messages**: বর্ণনামূলক এবং পরিষ্কার করুন
-- **Testing**: নতুন ফিচারের জন্য টেস্ট লিখুন
+- Keep authentication concerns in `assets/js/auth.js`.
+- Keep navigation and view rendering in `assets/js/spa-router.js`.
+- Keep external HTTP calls behind `assets/js/api-handler.js`.
+- Do not place secrets in HTML, JavaScript, CSS, or committed configuration.
+- Prefer accessible semantic HTML and progressive enhancement.
+- Keep global styles in `style.css`; authentication-only styles belong in `auth.css`.
 
-## Pull Request প্রক্রিয়া
+## Commit conventions
 
-1. আপনার branch-এ পরিবর্তনগুলি করুন
-2. টেস্ট চালান: `npm test`
-3. আপনার রিপোজিটরিতে push করুন
-4. একটি Pull Request খুলুন
-5. রিভিউয়ারদের মন্তব্যের প্রতিক্রিয়া জানান
+Use an imperative, descriptive prefix such as `feat:`, `fix:`, `refactor:`, `docs:`, or `chore:`.
 
-## সমস্যা রিপোর্ট করুন
+## Pull requests
 
-- [Issues](https://github.com/RafsanJamilBhuiya/ai-workspace-pro/issues) খুলুন
-- বর্ণনামূলক শিরোনাম এবং বিবরণ প্রদান করুন
-- পুনরুৎপাদন করার পদক্ষেপগুলি অন্তর্ভুক্ত করুন
+Include:
 
-## যোগাযোগ
+- what changed;
+- why it changed;
+- tests/checks performed;
+- screenshots for meaningful UI changes;
+- any required environment or OAuth configuration changes.
 
-প্রশ্ন থাকলে [Discussion](https://github.com/RafsanJamilBhuiya/ai-workspace-pro/discussions) শুরু করুন।
+## Security
 
----
-
-ধন্যবাদ আপনার অবদানের জন্য!
+Never commit API keys, OAuth client secrets, service-account credentials, access tokens, or private Google Apps Script deployment information. Report security vulnerabilities privately rather than opening a public issue.
