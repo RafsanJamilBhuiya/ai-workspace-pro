@@ -1,10 +1,16 @@
-/* AI Workspace Pro — GitHub Pages project-site service worker */
+/* AI Workspace Pro — deployment-root aware service worker.
+ *
+ * The same source must work on:
+ *   - GitHub Pages project sites: /ai-workspace-pro/
+ *   - A domain root: /
+ *
+ * The worker derives its scope from self.registration.scope, so no hostname or
+ * project-path is hard-coded here.
+ */
 
-// The worker is installed at /ai-workspace-pro/service-worker.js and therefore
-// must remain scoped to the project site, never the domain root.
 const BASE_PATH = new URL('./', self.registration.scope).pathname;
-const CACHE_NAME = 'aiwp-static-v2';
-const RUNTIME_CACHE = 'aiwp-runtime-v2';
+const CACHE_NAME = 'aiwp-static-v3';
+const RUNTIME_CACHE = 'aiwp-runtime-v3';
 
 const STATIC_ASSETS = [
   './',
@@ -25,6 +31,10 @@ const STATIC_ASSETS = [
   './assets/js/ai-guardrails.js'
 ];
 
+function scopedUrl(path) {
+  return new URL(path, self.registration.scope).href;
+}
+
 function inScope(url) {
   return url.origin === self.location.origin && url.pathname.startsWith(BASE_PATH);
 }
@@ -32,7 +42,7 @@ function inScope(url) {
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS.map(path => new URL(path, self.registration.scope).href)))
+      .then(cache => cache.addAll(STATIC_ASSETS.map(scopedUrl)))
       .then(() => self.skipWaiting())
   );
 });
@@ -42,7 +52,7 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME && key !== RUNTIME_CACHE)
+          .filter(key => key.startsWith('aiwp-') && key !== CACHE_NAME && key !== RUNTIME_CACHE)
           .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
@@ -60,18 +70,14 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
   const isNavigation = request.mode === 'navigate';
-  const isApi = /\/api(?:\/|$)|\/v1(?:\/|$)/i.test(url.pathname);
+  const isApi = /\/api(?:\/|$)|\/v1(?:\/|$)/i.test(url.pathname.slice(BASE_PATH.length));
 
   if (isApi) {
     event.respondWith(networkFirst(request, RUNTIME_CACHE));
     return;
   }
 
-  event.respondWith(
-    isNavigation
-      ? networkFirst(request, CACHE_NAME)
-      : cacheFirst(request, CACHE_NAME)
-  );
+  event.respondWith(isNavigation ? networkFirst(request, CACHE_NAME) : cacheFirst(request, CACHE_NAME));
 });
 
 async function cacheFirst(request, cacheName) {
@@ -103,7 +109,7 @@ async function networkFirst(request, cacheName) {
     if (cached) return cached;
 
     if (request.mode === 'navigate') {
-      const fallback = await caches.match(new URL('./index.html', self.registration.scope).href);
+      const fallback = await caches.match(scopedUrl('./index.html'));
       if (fallback) return fallback;
     }
 
